@@ -9,7 +9,7 @@ Created on Tue Sep  8 17:34:38 2020
 import os,sys
 import argparse
 import tbmate
-from tbmate import Pack,Header,Query,version
+from tbmate import Pack,Header,Query,__version__
 
 dtype_fmt={
         'float':'f',
@@ -30,7 +30,7 @@ dtype_map_rev={
         }
 # =============================================================================
 def get_version():
-    return tbmate.tbmate.version
+    return __version__
 
 def prepare_optparser():
     usage = "usage: pytbmate <command> [optional] args\n" #python %prog

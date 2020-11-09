@@ -9,7 +9,7 @@ import struct
 import tabix
 import gzip
 # =============================================================================
-version="1.0"
+__version__=1.0
 
 dtype_fmt={
         'float':'f',
@@ -65,8 +65,7 @@ def Pack(Input,idx='idx.gz',basename="out",cols_to_pack=[4],
             raise Exception("Length of idx should exceed 500.")
         fo=open(outfile,'wb')
         fo.write(struct.pack('3s',b'tbk')) #'tbk',byte=3*1=3
-        fo.write(struct.pack('i',version)) #version:1; byte=4
-    #    fo.write(struct.pack('i',dtype_map[dtype])) #dtype,byte=4
+        fo.write(struct.pack('f',__version__)) #__version__:1; byte=4
         fo.write(struct.pack('q',dtype_map[dtype])) #dtype, bytes=8
     #    fo.write(struct.pack('i',idx_len)) #idx_len, byte=4
         fo.write(struct.pack('q',-1)) #max data, byte=8
@@ -165,7 +164,7 @@ def Header(tbk_file):
     identifier=Read(tbk_file,0,3,'3s') #'tbk',byte=3*1=3
     if identifier.decode('utf-8') != 'tbk':
         raise Exception("Input .tbk file is not standard tbk file.")
-    ver=Read(tbk_file,3,4,'i') #version:1; byte=4
+    ver=Read(tbk_file,3,4,'f') #__version__:1; byte=4
 #    dtype=Read(tbk_file,7,4,'i') #dtype,byte=4
     dtype=Read(tbk_file,7,8,'q') #dtype,byte=8
 #    idx_len=Read(tbk_file,11,4,'i') #idx_len, bytes=4
