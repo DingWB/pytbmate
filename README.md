@@ -28,7 +28,7 @@ The executable programs will be installed to a bin subdirectory under your speci
 ```
 export PATH=/usr/local/htslib/bin:$PATH
 ```
-You can chech whether tabix is successfully installed by running:
+You can check whether tabix is successfully installed by running:
 ```
 tabix -h
 ```
@@ -46,6 +46,7 @@ mv tbmate /usr/bin
 ```
 
 3. **Install pytabix**:
+
 You can install pytabix before installing pytbmate, or pytabix will be install automatically when pytbmate is installed.
 ```
 pip install pytabix
