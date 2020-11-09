@@ -6,7 +6,7 @@ Pytbmate is a Python API for [TabixMate](https://github.com/zhou-lab/tbmate): ni
 - [tbmate](https://github.com/zhou-lab/tbmate)
 - [pytabix](https://github.com/slowkow/pytabix)
 
-## Installation
+## **Installation**
 1. **Install tabix**:
 
 You can download and install tabix in http://www.htslib.org/doc/tabix.html. Or:
@@ -34,9 +34,9 @@ chmod a+x tbmate
 mv tbmate /usr/bin
 ```
 
-3. Install pytbmate:
+3. **Install pytbmate**:
 ```
-pip install pytabix #If this step is skipped, then pytabix will be installed automatically when you install pytbmate
+pip install pytabix
 pip install git+https://github.com/DingWB/pytbmate
 ```
 OR
@@ -46,5 +46,5 @@ cd pytbmate
 python setup.py install
 ```
 
-## Usage
+## **Usage**
 1. Building tabix index.
