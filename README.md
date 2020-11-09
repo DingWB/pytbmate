@@ -9,13 +9,7 @@ Pytbmate is a Python API for [TabixMate](https://github.com/zhou-lab/tbmate): ni
 ## Installation
 1. **Install tabix**:
 
-If you have already installed HTSlib, then tabix should be already installed in your system.</br>
-To test whether tabix is installed in your computer:
-```
-tabix --version
-```
-If not, you can download and install it in http://www.htslib.org/doc/tabix.html.</br>
-OR
+You can download and install tabix in http://www.htslib.org/doc/tabix.html. Or:
 ```
 wget https://github.com/samtools/htslib/releases/download/1.11/htslib-1.11.tar.bz2
 tar jxvf htslib-1.11.tar.bz2
@@ -23,14 +17,9 @@ cd htslib-1.11
 ./configure --prefix=/usr/local/htslib
 make
 make install
-```
-The executable programs will be installed to a bin subdirectory under your specified prefix, so you may wish to add this directory to your $PATH:
-```
+
+#Adding to your $PATH
 export PATH=/usr/local/htslib/bin:$PATH
-```
-You can check whether tabix is successfully installed by running:
-```
-tabix -h
 ```
 
 2. **Install tbmate**:
@@ -45,15 +34,9 @@ chmod a+x tbmate
 mv tbmate /usr/bin
 ```
 
-3. **Install pytabix**:
-
-You can install pytabix before installing pytbmate, or pytabix will be install automatically when pytbmate is installed.
+3. Install pytbmate:
 ```
-pip install pytabix
-```
-
-4. Install pytbmate:
-```
+pip install pytabix #If this step is skipped, then pytabix will be installed automatically when you install pytbmate
 pip install git+https://github.com/DingWB/pytbmate
 ```
 OR
