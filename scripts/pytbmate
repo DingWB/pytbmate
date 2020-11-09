@@ -8,7 +8,8 @@ Created on Tue Sep  8 17:34:38 2020
 
 import os,sys
 import argparse
-from tbmate import Pack,Header,Query
+import tbmate
+from tbmate import Pack,Header,Query,version
 
 dtype_fmt={
         'float':'f',
@@ -28,14 +29,18 @@ dtype_map_rev={
         7:'string'
         }
 # =============================================================================
+def get_version():
+    return tbmate.tbmate.version
+
 def prepare_optparser():
-    usage = "usage: tbmate <command> [optional] args\n" #python %prog
-    description = "tbmate"
+    usage = "usage: pytbmate <command> [optional] args\n" #python %prog
+    description = "pytbmate"
 
-    epilog='example usage:\n tbmate.py pack -o outbasename -i index.gz file1.gz; tbmate.py query -r chr1:10468-10470 in.tbk'
+    epilog='example usage:\n pytbmate pack -o outbasename -i index.gz file1.gz; pytbmate query -r chr1:10468-10470 in.tbk'
 
-    parser = argparse.ArgumentParser(prog='tbmate',usage=usage,\
+    parser = argparse.ArgumentParser(prog='pytbmate',usage=usage,\
              description=description,epilog=epilog)
+    parser.add_argument('-v', '--version', action='version', version=get_version(),help='Display version')
 
     subparsers = parser.add_subparsers(title="commands",dest='command',
                 metavar='')
@@ -44,19 +49,19 @@ def prepare_optparser():
         parents=[SubcommandArgs(case='header')],
         help="show header of a given .tbk file",
         add_help=True,
-        usage='tbmate header -i in.tbk\n')
+        usage='pytbmate header -i in.tbk\n')
 
     subparsers.add_parser('pack',formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         parents=[SubcommandArgs(case='pack')],
         help="Pack file into .tbk, file must be the same order with index file.",
         add_help=True,
-        usage='tbmate pack -i infile.txt.gz -o out.tbk\n')
+        usage='pytbmate pack -i infile.txt.gz -o out.tbk\n')
 
     subparsers.add_parser('query',formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         parents=[SubcommandArgs(case='query')],
         help="Query from a .tbk file",
         add_help=True,
-        usage='tbmate query -r chr1:10468-10470 -o out.tbk\n')
+        usage='pytbmate query -r chr1:10468-10470 -o out.tbk\n')
 
     parser.add_argument('infile',help="input file",metavar="<infile>") #type=argparse.FileType('r')
 

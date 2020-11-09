@@ -6,4 +6,7 @@ Created on Sun Nov  8 14:52:41 2020
 @author: DingWB
 """
 
-from .tbmate import Pack,Header,Query
+from .tbmate import *
+__all__=['Pack','Query','Header']
+
+__version__='1.0'

@@ -5,13 +5,11 @@ Created on Tue Sep  8 17:34:38 2020
 
 @author: DingWB
 """
-
 import struct
-import os,sys
-import pandas as pd
 import tabix
+import gzip
 # =============================================================================
-version=1
+version="1.0"
 
 dtype_fmt={
         'float':'f',
@@ -86,7 +84,6 @@ def Pack(Input,idx='idx.gz',basename="out",cols_to_pack=[4],
 
     #Starting to write data
     if Input.endswith('.gz'):
-        import gzip
         fi=gzip.open(Input,mode='rb')
     else:
         fi=open(Input,'r',encoding='utf-8')
