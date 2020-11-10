@@ -278,7 +278,7 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
     while line:
         values=line.split('\t')
         Chr, Start, End, Index=values
-        start=size*Index+base_idx
+        start=size*int(Index)+base_idx
         f_tbk.seek(start)
         r=f_tbk.read(size)
         print(struct.unpack(fmt,r)[0])
