@@ -146,7 +146,7 @@ def pack_list(L=None,idx='idx.gz',dtype='float',outfile="out.tbk"):
     f.close()
     
 # =============================================================================
-def to_tbk(data=None,cols=[],idx='idx.gz',out_basename="out",
+def to_tbk(data=None,cols=[],idx='idx.gz',outdir="./",
         dtypes=[],na=-1):
     """
     data: A pandas dataframe or a list or values ordered by the tabix indexed coordinate.
@@ -158,6 +158,7 @@ def to_tbk(data=None,cols=[],idx='idx.gz',out_basename="out",
           If dtypes is a string, then it will be expanded to a list with the same length with cols.
     na: The NaN values in data will be replace with na, should be an integer.
     """
+    outdir=os.path.abspath(outdir)
 #    header=None
 #    with gzip.open(idx,'rb') as f:
 #        line=f.readline()
@@ -177,7 +178,7 @@ def to_tbk(data=None,cols=[],idx='idx.gz',out_basename="out",
         df_idx[col]=df_idx.ID.map(data[col].to_dict())
         df_idx[col].fillna(na,inplace=True)
         pack_list(L=df_idx[col].tolist(),idx=idx,dtype=dtype,\
-                  outfile=out_basename+'_'+col+'.tbk')
+                  outfile=os.path.join(outdir,col+'.tbk'))
     
 # =============================================================================
 def Read(tbk_file,start,size,fmt):
