@@ -54,11 +54,10 @@ wget ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/ProductFiles/HumanM
 ```
 Prepare tabix index file
 ```
-sed '1,8d' HumanMethylation450_15017482_v1-2.csv |cut -f 1 -d ","|grep -E "^cg|^ch|^rs" | sort -k1V |awk 'BEGIN {OFS="\t";print "seqname","start","end","index"} {print $0,1,2,NR-1}' | bgzip > hm450_idx.bed.gz
+sed '1,8d' HumanMethylation450_15017482_v1-2.csv |cut -f 1 -d ","|grep -E "^cg|^ch|^rs" | sort -k1V |awk 'BEGIN {OFS="\t";} {print $0,1,2,NR-1}' | bgzip > hm450_idx.bed.gz
 zcat hm450_idx.bed.gz |head
 ```
 ```
-seqname	start	end	index
 cg00000029	1	2	0
 cg00000108	1	2	1
 cg00000109	1	2	2
@@ -71,7 +70,7 @@ cg00000363	1	2	8
 ```
 Index the bed.gz with tabix:
 ```
-tabix -s 1 -b 2 -e 3 -p bed hm450_idx.bed.gz 
+tabix -b 2 -e 3 -p bed hm450_idx.bed.gz 
 ```
 Simple query with tabix:
 ```
@@ -81,3 +80,26 @@ tabix hm450_idx.bed.gz cg18478105:1-2
 Similarly, a EPIC manifest file can be downloaded from [here](http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip). To save time, we provided the index files and tabix index for EPIC and WGBS in [test dataset](https://).
 
 **2. Packing data into .tbk files.**
+- (1). Packing Hm450 array data.
+```
+cd Test/HM450/
+```
+Then read hm450.example.txt.gz into Python.
+```
+import tbmate
+import pandas as pd
+
+idx_file="hm450_idx.bed.gz"
+data=pd.read_csv("hm450.example.txt.gz",sep='\t')
+data.head()
+
+      seqname  start  end  GSM3417545  GSM3417546  GSM3417547
+0  cg00000029      1    2    0.622689    0.578341    0.418048
+1  cg00000108      1    2    0.924396    0.903956    0.906324
+2  cg00000109      1    2    0.741272    0.828271    0.873561
+3  cg00000165      1    2    0.809239    0.465659    0.693626
+4  cg00000236      1    2    0.785956    0.855497    0.804233
+
+to_tbk(data=data,cols=['GSM3417545','GSM3417546','GSM3417547'],idx=idx_file,out_basename="hm450",dtypes='float')
+
+```
