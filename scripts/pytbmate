@@ -105,7 +105,7 @@ def opt_validate(optparser):
         start=1
         end=2
         if ':' in args.region:
-            Chr=args.region.split(':')[0]
+            seqname=args.region.split(':')[0]
             s=args.region.split(':')[1]
             if '-' in s:
                 try:
@@ -115,8 +115,8 @@ def opt_validate(optparser):
                     sys.exit("Please input correct region.")
 
         else:
-            Chr=args.region
-        args.region=[Chr,start,end]
+            seqname=args.region
+        args.region=[seqname,start,end]
     return args
 # =============================================================================
 #
@@ -132,14 +132,14 @@ if __name__=="__main__":
              cols_to_pack=args.cols,dtypes=args.dtypes)
     else:#view
         if args.region:
-            Chr,start,end=args.region
-            R=Query(tbk_file=args.infile,Chr=Chr,start=start,end=end,
+            seqname,start,end=args.region
+            R=Query(tbk_file=args.infile,seqname=seqname,start=start,end=end,
               idx=None,dtype=None,base_idx=8192)
-            print("Chr\tstart\tend\t%s"%args.infile)
+            print("seqname\tstart\tend\t%s"%os.path.basename(args.infile))
             if type(R) != list:
-                print(f"{Chr}\t{start}\t{end}\t{R}")
+                print(f"{seqname}\t{start}\t{end}\t{R}")
             else:
                 for r in R:
-                    print(f"{Chr}\t{start}\t{end}\t{r}")
+                    print(f"{seqname}\t{start}\t{end}\t{r}")
         else:#No region "-r" was given, then view all recores
             View(tbk_file=args.infile,idx=args.index,dtype=None,base_idx=8192)

@@ -5,10 +5,11 @@ Created on Tue Sep  8 17:34:38 2020
 
 @author: DingWB
 """
+import sys
+import os
 import struct
 import tabix
 import gzip
-import sys
 # =============================================================================
 __version__=1.0
 
@@ -208,14 +209,14 @@ def read_multi_samples(tbk_files=[],n=0,fmt='f',base_idx=8192):
 # =============================================================================
 #
 # =============================================================================
-def Query(tbk_file=None,Chr=None,start=1,end=2,
+def Query(tbk_file=None,seqname=None,start=1,end=2,
           idx=None,dtype=None,base_idx=8192):
     """
     The main function for querying.
     tbk_file: input a single .tbk file.
-    Chr: Chromosome (or the sequence name for tabix).
+    seqname: Chromosome (or the sequence name for tabix).
     start: start position.
-    end: End position.
+    end: end position.
     base_idx: Number of index that should be skipped.
     """
     if idx is None or dtype is None:
@@ -223,7 +224,7 @@ def Query(tbk_file=None,Chr=None,start=1,end=2,
         dtype=dtype_map_rev[dtype]
     fmt=dtype_fmt[dtype]
     tb = tabix.open(idx)
-    records=tb.query(Chr,start,end)
+    records=tb.query(seqname,start,end)
     lineNum=[record[3] for record in records]
     if len(lineNum)==0:
         return None
@@ -232,14 +233,14 @@ def Query(tbk_file=None,Chr=None,start=1,end=2,
     n1,n2=lineNum[0],lineNum[-1]
     return read_multi_site(tbk_file,n1,n2,fmt,base_idx)
 # =============================================================================
-def QueryMultiSamples(tbk_files=[],Chr=None,start=1,end=2,
+def QueryMultiSamples(tbk_files=[],seqname=None,start=1,end=2,
           idx=None,dtype=None,base_idx=8192):
     """
     The function for querying multiple samples.
     tbk_file: input a file list.
-    Chr: Chromosome (or the sequence name for tabix).
+    seqname: Chromosome (or the sequence name for tabix).
     start: start position.
-    end: End position.
+    end: end position.
     idx: index file.
     dtype: dtype
     base_idx: Number of index that should be skipped.
@@ -248,7 +249,7 @@ def QueryMultiSamples(tbk_files=[],Chr=None,start=1,end=2,
         raise Exception("Please provide idx and dtype")
     fmt=dtype_fmt[dtype]
     tb = tabix.open(idx)
-    records=tb.query(Chr,start,end)
+    records=tb.query(seqname,start,end)
     lineNum=[record[3] for record in records]
     if len(lineNum)==0:
         return None
@@ -275,17 +276,23 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
     f_tbk=open(tbk_file,'rb')
     line=fi.readline()
     line=line.decode('utf-8')
+    if line.split('\t')[0]=='seqname':
+        line=fi.readline()
+        line=line.decode('utf-8')
     size=struct.calcsize(fmt)
-    sys.stdout.write(f"Chr\tStart\tEnd\t{tbk_file}\n")
+    name=os.path.basename(tbk_file)
+    sys.stdout.write(f"seqname\tstart\tend\t{name}\n")
     while line:
         values=line.split('\t')
-        Chr, Start, End, Index=values
+        seqname, start, end, Index=values
         start=size*int(Index)+base_idx
         f_tbk.seek(start)
         r=f_tbk.read(size)
         v=struct.unpack(fmt,r)[0]
+#        if v==-1:
+#            v='NA'
         try:
-            sys.stdout.write(f"{Chr}\t{Start}\t{End}\t{v}\n")
+            sys.stdout.write(f"{seqname}\t{start}\t{end}\t{v}\n")
             line=fi.readline()
             line=line.decode('utf-8')
         except:
