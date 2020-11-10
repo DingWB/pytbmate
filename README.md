@@ -54,11 +54,11 @@ wget ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/ProductFiles/HumanM
 ```
 Prepare tabix index file
 ```
-sed '1,8d' HumanMethylation450_15017482_v1-2.csv |cut -f 1 -d ","|grep -E "^cg|^ch|^rs" | sort -k1V |awk 'BEGIN {OFS="\t";print "Chr","Start","End","Index"} {print $0,1,2,NR-1}' | bgzip > hm450_idx.bed.gz
+sed '1,8d' HumanMethylation450_15017482_v1-2.csv |cut -f 1 -d ","|grep -E "^cg|^ch|^rs" | sort -k1V |awk 'BEGIN {OFS="\t";print "seqname","start","end","index"} {print $0,1,2,NR-1}' | bgzip > hm450_idx.bed.gz
 zcat hm450_idx.bed.gz |head
 ```
 ```
-Chr	Start	End	Index
+seqname	start	end	index
 cg00000029	1	2	0
 cg00000108	1	2	1
 cg00000109	1	2	2
