@@ -170,7 +170,7 @@ def Header(tbk_file):
 #    idx_len=Read(tbk_file,11,4,'i') #idx_len, bytes=4
 #    idx=Read(tbk_file,15,idx_len,f'{idx_len}s') #idx,bytes=idx_len
 #    idx=idx.decode('utf-8')
-    num=Read(tbk_file,15,8,'q') #max data, byte=8
+    num=Read(tbk_file,15,8,'q') #maximum data length, byte=8
     idx=Read(tbk_file,23,8169,'8169s')
     idx=idx.decode('utf-8').replace('\x00','')
     return [ver,dtype,num,idx]
@@ -259,4 +259,28 @@ def QueryMultiSamples(tbk_files=[],Chr=None,start=1,end=2,
 #
 #    return querys(tbk_file,n1,n2,fmt,base_idx)
 # =============================================================================
-#
+
+def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
+    """
+    Viewing all records in a given tbk file.
+    tbk_file: input .tbk file.
+    base_idx: Number of index that should be skipped.
+    """
+    if idx is None or dtype is None:
+        ver,dtype,num,idx=Header(tbk_file)
+        dtype=dtype_map_rev[dtype]
+    fmt=dtype_fmt[dtype]
+    fi=gzip.open(idx,mode='rb')
+    f_tbk=open(tbk_file,'rb')
+    line=fi.readline()
+    size=struct.calcsize(fmt)
+    while line:
+        values=line.split('\t')
+        Chr, Start, End, Index=values
+        start=size*Index+base_idx
+        f_tbk.seek(start)
+        r=f_tbk.read(size)
+        print(struct.unpack(fmt,r)[0])
+        line=fi.readline()
+    fi.close()
+    f_tbk.close()

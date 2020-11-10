@@ -8,7 +8,7 @@ Created on Tue Sep  8 17:34:38 2020
 import os,sys
 import argparse
 import tbmate
-from tbmate import Pack,Header,Query,__version__
+from tbmate import Pack,Header,Query,View,__version__
 
 dtype_fmt={
         'float':'f',
@@ -56,12 +56,12 @@ def prepare_optparser():
         add_help=True,
         usage='pytbmate pack -i infile.txt.gz -o out.tbk\n')
 
-    subparsers.add_parser('query',formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        parents=[SubcommandArgs(case='query')],
-        help="Query from a .tbk file",
+    subparsers.add_parser('view',formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        parents=[SubcommandArgs(case='view')],
+        help="View a .tbk file",
         add_help=True,
-        usage='pytbmate query -r chr1:10468-10470 -o out.tbk\n')
-
+        usage='pytbmate view -r chr1:10468-10470 -o out.tbk\n')
+    
     parser.add_argument('infile',help="input file",metavar="<infile>") #type=argparse.FileType('r')
 
     return parser
@@ -80,10 +80,11 @@ def SubcommandArgs(case='pack'):
                         type=str,help="output basename",\
                         metavar="<outname>",required=True)
 
-    if case=='query':
+    if case=='view':
         required.add_argument('-r', '--region',dest='region',\
-                        type=str,help="region to query",\
+                        type=str,help="region to view",\
                         metavar="<region>",required=True)
+        
 
     optional = parser.add_argument_group('Optional arguments')
 
@@ -99,6 +100,9 @@ def SubcommandArgs(case='pack'):
 #        optional.add_argument('-f', '--force',dest='force',\
 #                        action='store_true',\
 #                        help="if outname_*.tbk exists, whether to overwrite it.")
+    elif case == 'view':
+        optional.add_argument('-i', '--index',dest='index',type=str,\
+                        help="index file",metavar="<index>",required=True)
     return parser
 # =============================================================================
 #
@@ -121,7 +125,7 @@ def opt_validate(optparser):
             if dtype not in dtype_fmt:
                 sys.exit(f"Input dtype '{dtype}' can not be recognized.")
 
-    elif args.command == 'query':#query
+    elif args.command == 'view':#view
         start=1
         end=2
         if ':' in args.region:
@@ -150,13 +154,16 @@ if __name__=="__main__":
     elif args.command == 'pack':
         Pack(args.infile,idx=args.index,basename=args.outname,\
              cols_to_pack=args.cols,dtypes=args.dtypes)
-    else:#query
-        Chr,start,end=args.region
-        R=Query(tbk_file=args.infile,Chr=Chr,start=start,end=end,
-          idx=None,dtype=None,base_idx=8192)
-        print("Chr\tstart\tend\t%s"%args.infile)
-        if type(R) != list:
-            print(f"{Chr}\t{start}\t{end}\t{R}")
-        else:
-            for r in R:
-                print(f"{Chr}\t{start}\t{end}\t{r}")
+    else:#view
+        if args.region:
+            Chr,start,end=args.region
+            R=Query(tbk_file=args.infile,Chr=Chr,start=start,end=end,
+              idx=None,dtype=None,base_idx=8192)
+            print("Chr\tstart\tend\t%s"%args.infile)
+            if type(R) != list:
+                print(f"{Chr}\t{start}\t{end}\t{R}")
+            else:
+                for r in R:
+                    print(f"{Chr}\t{start}\t{end}\t{r}")
+        else:#No region "-r" was given, then view all recores
+            View(tbk_file=args.infile,idx=args.index,dtype=None,base_idx=8192)
