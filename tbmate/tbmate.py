@@ -273,6 +273,7 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
     fi=gzip.open(idx,mode='rb')
     f_tbk=open(tbk_file,'rb')
     line=fi.readline()
+    line=line.decode('utf-8')
     size=struct.calcsize(fmt)
     while line:
         values=line.split('\t')
@@ -282,5 +283,6 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
         r=f_tbk.read(size)
         print(struct.unpack(fmt,r)[0])
         line=fi.readline()
+        line=line.decode('utf-8')
     fi.close()
     f_tbk.close()

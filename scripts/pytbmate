@@ -75,7 +75,10 @@ def SubcommandArgs(case='pack'):
 #                        help="if outname_*.tbk exists, whether to overwrite it.")
     elif case == 'view':
         optional.add_argument('-i', '--index',dest='index',type=str,\
-                        help="index file",metavar="<index>",required=True)
+                        help="index file",metavar="<index>",required=False)
+        optional.add_argument('-r', '--region',dest='region',\
+                        type=str,help="region to query",\
+                        metavar="<region>",required=False)
     return parser
 # =============================================================================
 #
@@ -98,7 +101,7 @@ def opt_validate(optparser):
             if dtype not in dtype_fmt:
                 sys.exit(f"Input dtype '{dtype}' can not be recognized.")
 
-    elif args.command == 'view':#view
+    elif args.command == 'view' and args.region:#view
         start=1
         end=2
         if ':' in args.region:
