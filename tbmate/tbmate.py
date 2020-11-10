@@ -11,63 +11,7 @@ import struct
 import tabix
 import gzip
 import pandas as pd
-# =============================================================================
-__version__=1.0
-
-dtype_fmt={
-        'float':'f',
-        'int':'i',
-        'string':'s',
-        'chr':'c',
-        'double':'d'
-        }
-
-dtype_map={
-        'int':1,
-        'float':4,
-        'double':5,
-        'string':7,
-        'chr':6
-        }
-
-dtype_map_rev={
-        1:'int',
-        2:'int',
-        3:'int',
-        4:'float',
-        5:'double',
-        6:'chr',
-        7:'string'
-        }
-
-dtype_func={
-        'float':float,
-        'int':int,
-        'string':str,
-        'chr':str,
-        'double':float
-        }
-# =============================================================================
-def pack_header(idx,outfile,dtype):
-    print(f"Packing and writing to {outfile}")
-    idx_len=len(idx)
-    fo=open(outfile,'wb')
-    fo.write(struct.pack('3s',b'tbk')) #'tbk',byte=3*1=3
-    fo.write(struct.pack('f',__version__)) #__version__:1; byte=4
-    fo.write(struct.pack('q',dtype_map[dtype])) #dtype, bytes=8
-#    fo.write(struct.pack('i',idx_len)) #idx_len, byte=4
-    fo.write(struct.pack('q',-1)) #max data, byte=8
-
-    if idx_len > 8169:
-        idx=idx[:8169]
-
-    fo.write(struct.pack(f'{idx_len}s',bytes(idx,'utf-8'))) #idx file, byte=idx_len
-
-    if idx_len < 8169:
-        for i in range(8169-idx_len):
-            fo.write(struct.pack('x')) #fill to 500.
-    #Total used bytes = 3+4+8+8+8169=8192
-    return fo
+from utility import *
 # =============================================================================
 def Pack(Input,idx='idx.gz',basename="out",cols_to_pack=[4],
         dtypes=['float']):
@@ -217,7 +161,7 @@ def Header(tbk_file):
     identifier=Read(tbk_file,0,3,'3s') #'tbk',byte=3*1=3
     if identifier.decode('utf-8') != 'tbk':
         raise Exception("Input .tbk file is not standard tbk file.")
-    ver=Read(tbk_file,3,4,'f') #__version__:1; byte=4
+    ver=Read(tbk_file,3,4,'f') #version:1; byte=4
 #    dtype=Read(tbk_file,7,4,'i') #dtype,byte=4
     dtype=Read(tbk_file,7,8,'q') #dtype,byte=8
 #    idx_len=Read(tbk_file,11,4,'i') #idx_len, bytes=4
@@ -227,8 +171,6 @@ def Header(tbk_file):
     idx=Read(tbk_file,23,8169,'8169s')
     idx=idx.decode('utf-8').replace('\x00','')
     return [ver,dtype,num,idx]
-# =============================================================================
-#
 # =============================================================================
 def read_one_site(tbk_file,line_num,fmt,base_idx=8192):
     """
@@ -257,8 +199,6 @@ def read_multi_samples(tbk_files=[],n=0,fmt='f',base_idx=8192):
     start=size*n+base_idx
     R=[Read(tbk_file,start,size,fmt) for tbk_file in tbk_files]
     return R
-# =============================================================================
-#
 # =============================================================================
 def Query(tbk_file=None,seqname=None,start=1,end=2,
           idx=None,dtype=None,base_idx=8192):
@@ -312,7 +252,6 @@ def QueryMultiSamples(tbk_files=[],seqname=None,start=1,end=2,
 #
 #    return querys(tbk_file,n1,n2,fmt,base_idx)
 # =============================================================================
-
 def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
     """
     Viewing all records in a given tbk file.
