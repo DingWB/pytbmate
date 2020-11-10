@@ -100,6 +100,9 @@ data.head()
 3  cg00000165      1    2    0.809239    0.465659    0.693626
 4  cg00000236      1    2    0.785956    0.855497    0.804233
 
-to_tbk(data=data,cols=['GSM3417545','GSM3417546','GSM3417547'],idx=idx_file,out_basename="hm450",dtypes='float')
+# Packing three columns into .tbk files:
+tbmate.to_tbk(data=data,cols=['GSM3417545','GSM3417546','GSM3417547'],idx=idx_file,out_basename="hm450",dtypes='float')
+# Or you can pack a list/array into .tbk files:
+tbmate.pack_list(L=data['GSM3417545'].tolist(),idx='idx_file,dtype='float',outfile="test.tbk")
 
 ```
