@@ -10,6 +10,7 @@ import os
 import struct
 import tabix
 import gzip
+import pandas as pd
 # =============================================================================
 __version__=1.0
 
@@ -47,7 +48,26 @@ dtype_func={
         'double':float
         }
 # =============================================================================
-#
+def pack_header(idx,outfile,dtype):
+    print(f"Packing and writing to {outfile}")
+    idx_len=len(idx)
+    fo=open(outfile,'wb')
+    fo.write(struct.pack('3s',b'tbk')) #'tbk',byte=3*1=3
+    fo.write(struct.pack('f',__version__)) #__version__:1; byte=4
+    fo.write(struct.pack('q',dtype_map[dtype])) #dtype, bytes=8
+#    fo.write(struct.pack('i',idx_len)) #idx_len, byte=4
+    fo.write(struct.pack('q',-1)) #max data, byte=8
+
+    if idx_len > 8169:
+        idx=idx[:8169]
+
+    fo.write(struct.pack(f'{idx_len}s',bytes(idx,'utf-8'))) #idx file, byte=idx_len
+
+    if idx_len < 8169:
+        for i in range(8169-idx_len):
+            fo.write(struct.pack('x')) #fill to 500.
+    #Total used bytes = 3+4+8+8+8169=8192
+    return fo
 # =============================================================================
 def Pack(Input,idx='idx.gz',basename="out",cols_to_pack=[4],
         dtypes=['float']):
@@ -60,29 +80,6 @@ def Pack(Input,idx='idx.gz',basename="out",cols_to_pack=[4],
     dtype: 'float', 'int', 'string', 'chr','double'. The length of dtypes
             must be the same with cols_to_packpack
     """
-    def pack_header(idx,outfile,dtype):
-        print(f"Packing and writing to {outfile}")
-        idx_len=len(idx)
-        if idx_len > 8169:
-            raise Exception("Length of idx should exceed 500.")
-        fo=open(outfile,'wb')
-        fo.write(struct.pack('3s',b'tbk')) #'tbk',byte=3*1=3
-        fo.write(struct.pack('f',__version__)) #__version__:1; byte=4
-        fo.write(struct.pack('q',dtype_map[dtype])) #dtype, bytes=8
-    #    fo.write(struct.pack('i',idx_len)) #idx_len, byte=4
-        fo.write(struct.pack('q',-1)) #max data, byte=8
-
-        if idx_len > 8169:
-            idx=idx[:8169]
-
-        fo.write(struct.pack(f'{idx_len}s',bytes(idx,'utf-8'))) #idx file, byte=idx_len
-
-        if idx_len < 8169:
-            for i in range(8169-idx_len):
-                fo.write(struct.pack('x')) #fill to 500.
-        #Total used bytes = 3+4+8+8+8169=8192
-        return fo
-
     #Starting to write data
     if Input.endswith('.gz'):
         fi=gzip.open(Input,mode='rb')
@@ -129,6 +126,59 @@ def Pack(Input,idx='idx.gz',basename="out",cols_to_pack=[4],
     for i in f_write_dict:
         fo=f_write_dict[i]
         fo.close()
+# =============================================================================
+def pack_list(L=None,idx='idx.gz',dtype='float',outfile="out.tbk"):
+    """
+    Packing a list or an array into .tbk file.
+    L: A list or array.
+    idx: tabix indexed index file.
+    dtype: data type.
+    outfile: output .tbk file name.
+    """
+    f=pack_header(idx,outfile,dtype)
+    fmt=dtype_fmt[dtype]
+    dt_func=dtype_func[dtype]
+    for v in L:
+        f.write(struct.pack(fmt,dt_func(v)))
+    num=int((f.tell()-8192) / struct.calcsize(fmt))
+    f.seek(15)
+    f.write(struct.pack('q',num))
+    f.close()
+    
+# =============================================================================
+def to_tbk(data=None,cols=[],idx='idx.gz',out_basename="out",
+        dtypes=[],na=-1):
+    """
+    data: A pandas dataframe or a list or values ordered by the tabix indexed coordinate.
+        The first three columns should be seqname,start,end, Nan will be filled with na.
+    idx: index file, should be indexed with tabix.
+    cols: A list of columns to pack.
+    out_basename: Output basename. If the length of cols > 1, outfile will be out_basename_col.tbk
+    dtypes: A string or a list of data type. 'float', 'int', 'string', 'chr','double'. dtypes should have the same length as cols.
+          If dtypes is a string, then it will be expanded to a list with the same length with cols.
+    na: The NaN values in data will be replace with na, should be an integer.
+    """
+#    header=None
+#    with gzip.open(idx,'rb') as f:
+#        line=f.readline()
+#        line=line.decode('utf-8')
+#    if line.split('\t')[0]=='seqname':
+#        header=0
+    df_idx=pd.read_csv(idx,sep='\t',header=None)
+    df_idx.columns=['seqname', 'start', 'end', 'index']
+    df_idx['ID']=df_idx.seqname.map(str)+'-'+df_idx.start.map(str)+'-'+df_idx.end.map(str)
+    data['ID']=data.iloc[:,0].map(str)+'-'+data.iloc[:,1].map(str)+'-'+data.iloc[:,2].map(str)
+    data.set_index('ID',inplace=True)
+    if type(dtypes)==str:
+        dtypes=[dtypes]*len(cols)
+    assert len(dtypes)==len(cols)
+    for col,dtype in zip(cols,dtypes):
+        print(col,dtype)
+        df_idx[col]=df_idx.ID.map(data[col].to_dict())
+        df_idx[col].fillna(na,inplace=True)
+        pack_list(L=df_idx[col].tolist(),idx=idx,dtype=dtype,\
+                  outfile=out_basename+'_'+col+'.tbk')
+    
 # =============================================================================
 def Read(tbk_file,start,size,fmt):
     """
@@ -276,11 +326,11 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
     f_tbk=open(tbk_file,'rb')
     line=fi.readline()
     line=line.decode('utf-8')
-    if line.split('\t')[0]=='seqname':
-        line=fi.readline()
-        line=line.decode('utf-8')
+#    if line.split('\t')[0]=='seqname':
+#        line=fi.readline()
+#        line=line.decode('utf-8')
     size=struct.calcsize(fmt)
-    name=os.path.basename(tbk_file)
+    name=os.path.basename(tbk_file).replace('.tbk','')
     sys.stdout.write(f"seqname\tstart\tend\t{name}\n")
     while line:
         values=line.split('\t')

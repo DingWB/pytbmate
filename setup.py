@@ -18,6 +18,6 @@ setup(
    author_email='ding_wu_bin@163.com',
    url="https://github.com/DingWB/pytbmate",
    packages=['tbmate'],
-   install_requires=['pytabix==0.1'],
+   install_requires=['pytabix==0.1','gzip','pandas'],
    scripts=['scripts/pytbmate']
 )
