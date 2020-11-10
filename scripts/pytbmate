@@ -7,30 +7,9 @@ Created on Tue Sep  8 17:34:38 2020
 """
 import os,sys
 import argparse
-import tbmate
-from tbmate import Pack,Header,Query,View,__version__
-
-dtype_fmt={
-        'float':'f',
-        'int':'i',
-        'string':'s',
-        'chr':'c',
-        'double':'d'
-        }
-
-dtype_map_rev={
-        1:'int',
-        2:'int',
-        3:'int',
-        4:'float',
-        5:'double',
-        6:'chr',
-        7:'string'
-        }
+from tbmate import Pack,Header,Query,View
+from tbmate.tbmate import __version__,dtype_fmt,dtype_map_rev
 # =============================================================================
-def get_version():
-    return __version__
-
 def prepare_optparser():
     usage = "usage: pytbmate <command> [optional] args\n" #python %prog
     description = "pytbmate"
@@ -39,7 +18,7 @@ def prepare_optparser():
 
     parser = argparse.ArgumentParser(prog='pytbmate',usage=usage,\
              description=description,epilog=epilog)
-    parser.add_argument('-v', '--version', action='version', version=get_version(),help='Display version')
+    parser.add_argument('-v', '--version', action='version', version=__version__,help='Display version')
 
     subparsers = parser.add_subparsers(title="commands",dest='command',
                 metavar='')
@@ -79,12 +58,6 @@ def SubcommandArgs(case='pack'):
         required.add_argument('-o', '--outname',dest='outname',default='out',\
                         type=str,help="output basename",\
                         metavar="<outname>",required=True)
-
-    if case=='view':
-        required.add_argument('-r', '--region',dest='region',\
-                        type=str,help="region to view",\
-                        metavar="<region>",required=True)
-        
 
     optional = parser.add_argument_group('Optional arguments')
 
