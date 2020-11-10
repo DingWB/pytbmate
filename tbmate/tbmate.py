@@ -271,19 +271,29 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
         ver,dtype,num,idx=Header(tbk_file)
         dtype=dtype_map_rev[dtype]
     fmt=dtype_fmt[dtype]
-    with gzip.open(idx,mode='rb') as fi:
-        with open(tbk_file,'rb') as f_tbk:
-            line=fi.readline()
-            line=line.decode('utf-8')
-            size=struct.calcsize(fmt)
-            sys.stdout.write(f"Chr\tStart\tEnd\t{tbk_file}\n")
-            while line:
-                values=line.split('\t')
-                Chr, Start, End, Index=values
-                start=size*int(Index)+base_idx
-                f_tbk.seek(start)
-                r=f_tbk.read(size)
-                v=struct.unpack(fmt,r)[0]
-                sys.stdout.write(f"{Chr}\t{Start}\t{End}\t{v}\n")
-                line=fi.readline()
-                line=line.decode('utf-8')
+    fi=gzip.open(idx,mode='rb')
+    f_tbk=open(tbk_file,'rb')
+    line=fi.readline()
+    line=line.decode('utf-8')
+    size=struct.calcsize(fmt)
+    sys.stdout.write(f"Chr\tStart\tEnd\t{tbk_file}\n")
+    while line:
+        values=line.split('\t')
+        Chr, Start, End, Index=values
+        start=size*int(Index)+base_idx
+        f_tbk.seek(start)
+        r=f_tbk.read(size)
+        v=struct.unpack(fmt,r)[0]
+        try:
+            sys.stdout.write(f"{Chr}\t{Start}\t{End}\t{v}\n")
+        except:
+            try:
+                sys.stdout.close()
+                fi.close()
+                f_tbk.close()
+            except: #IOError
+                pass
+        line=fi.readline()
+        line=line.decode('utf-8')
+    fi.close()
+    f_tbk.close()
