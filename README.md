@@ -1,5 +1,5 @@
 # pytbmate
-Pytbmate is a Python API for [TabixMate](https://github.com/zhou-lab/tbmate): nimble storage of multifarious genomic data: https://github.com/zhou-lab/tbmate
+Pytbmate is a Python API for [TabixMate](https://github.com/zhou-lab/tbmate): nimble storage of multifarious genomic data
 
 ## Dependencies:
 - [tabix](http://www.htslib.org/doc/tabix.html)
@@ -9,7 +9,7 @@ Pytbmate is a Python API for [TabixMate](https://github.com/zhou-lab/tbmate): ni
 ## **Installation**
 1. **Install tabix**:
 
-You can download and install tabix in http://www.htslib.org/doc/tabix.html. Or:
+You can download and install [tabix](http://www.htslib.org/doc/tabix.html). Or:
 ```
 wget https://github.com/samtools/htslib/releases/download/1.11/htslib-1.11.tar.bz2
 tar jxvf htslib-1.11.tar.bz2
@@ -78,6 +78,6 @@ Simple query with tabix:
 tabix hm450_idx.bed.gz cg18478105:1-2
 ```
 
-Similarly, a EPIC manifest file can be downloaded from http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip. To save time, we provided the index files and tabix index for EPIC and WGBS in [test dataset](https://).
+Similarly, a EPIC manifest file can be downloaded from [here](http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip). To save time, we provided the index files and tabix index for EPIC and WGBS in [test dataset](https://).
 
 **2. Packing data into .tbk files.**
