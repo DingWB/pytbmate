@@ -8,6 +8,7 @@ Created on Tue Sep  8 17:34:38 2020
 import struct
 import tabix
 import gzip
+import sys
 # =============================================================================
 __version__=1.0
 
@@ -281,7 +282,7 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
         start=size*int(Index)+base_idx
         f_tbk.seek(start)
         r=f_tbk.read(size)
-        print(struct.unpack(fmt,r)[0])
+        sys.stdout.write("\t".join([Chr,Start,End,struct.unpack(fmt,r)[0]])+'\n')
         line=fi.readline()
         line=line.decode('utf-8')
     fi.close()
