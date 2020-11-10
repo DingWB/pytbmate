@@ -5,7 +5,6 @@ Created on Tue Sep  8 17:34:38 2020
 
 @author: DingWB
 """
-
 import os,sys
 import argparse
 import tbmate
