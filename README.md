@@ -48,29 +48,32 @@ python setup.py install
 
 ## **Usage**
 1. Building tabix index.
-- (1). Downloading EPIC manifest file and building tabix index:
+- (1). Download HM450 array manifest file and index it with tabix:
 ```
-#Download manifest file of EPIC from https://support.illumina.com
-wget http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip
-unzip infinium-methylationepic-v-1-0-b5-manifest-file-csv.zip
+#Downloading HM450 manifest file from illumina website
+wget ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/ProductFiles/HumanMethylation450/HumanMethylation450_15017482_v1-2.csv
+
 #Prepare tabix index file
-sed '1,8d' infinium-methylationepic-v-1-0-b5-manifest-file.csv |cut -f 1 -d ","|sort -k1V |awk 'BEGIN {OFS="\t";print "Chr","Start","End","Index"} {print $0,1,2,NR-1}' | bgzip > epic_idx.gz
-zcat epic_idx.gz |head
-```
-```
+sed '1,8d' HumanMethylation450_15017482_v1-2.csv |cut -f 1 -d ","|grep -E "^cg|^ch|^rs" | sort -k1V |awk 'BEGIN {OFS="\t";print "Chr","Start","End","Index"} {print $0,1,2,NR-1}' | bgzip > hm450_idx.bed.gz
+zcat hm450_idx.bed.gz |head
+
 Chr	Start	End	Index
-10609447	1	2	0
-10627500	1	2	1
-10676356	1	2	2
-10714330	1	2	3
-10731326	1	2	4
-10732387	1	2	5
-10740401	1	2	6
-10744385	1	2	7
-10760363	1	2	8
-```
-```
-tabix -s 1 -b 2 -e 3 epic_idx.gz
+cg00000029	1	2	0
+cg00000108	1	2	1
+cg00000109	1	2	2
+cg00000165	1	2	3
+cg00000236	1	2	4
+cg00000289	1	2	5
+cg00000292	1	2	6
+cg00000321	1	2	7
+cg00000363	1	2	8
+
+tabix -s 1 -b 2 -e 3 -p bed hm450_idx.bed.gz 
 #Simple query with tabix:
-tabix epic_idx.gz cg18478105:1-2
+tabix hm450_idx.bed.gz cg18478105:1-2
 ```
+
+- (2). EPIC and WGBS index files:
+Similarly, a EPIC manifest file can be downloaded from http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip. To save time, we provided the index file and tabix index for EPIC and WGBS in [test dataset](https://).
+
+2. Packing data into .tbk files.
