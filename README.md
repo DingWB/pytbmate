@@ -79,18 +79,19 @@ tabix hm450_idx.bed.gz cg18478105:1-2
 
 Similarly, a EPIC manifest file can be downloaded from [here](http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip). To save time, we provided the index files and tabix index for EPIC and WGBS in [test dataset](https://).
 
+
 **2. Packing data into .tbk files.**
 - (1). Packing Hm450 array data.
 ```
 cd Test/HM450/
 ```
-Then read hm450.example.txt.gz into Python.
+Reading example.bed.gz into Python.
 ```
 import tbmate
 import pandas as pd
 
 idx_file="hm450_idx.bed.gz"
-data=pd.read_csv("hm450.example.txt.gz",sep='\t')
+data=pd.read_csv("example.bed.gz",sep='\t')
 data.head()
 
       seqname  start  end  GSM3417545  GSM3417546  GSM3417547
@@ -101,8 +102,57 @@ data.head()
 4  cg00000236      1    2    0.785956    0.855497    0.804233
 
 # Packing three columns into .tbk files:
-tbmate.to_tbk(data=data,cols=['GSM3417545','GSM3417546','GSM3417547'],idx=idx_file,out_basename="hm450",dtypes='float')
+tbmate.to_tbk(data=data,cols=['GSM3417545','GSM3417546','GSM3417547'],idx=idx_file,dtypes='float')
 # Or you can pack a list/array into .tbk files:
-tbmate.pack_list(L=data['GSM3417545'].tolist(),idx='idx_file,dtype='float',outfile="test.tbk")
+tbmate.pack_list(L=data['GSM3417545'].tolist(),idx=idx_file,dtype='float',outfile="test.tbk")
+
+```
+
+- (2). Packing WGBS data.
+cd Test/WGBS/
+Reading example .gz file  into python.
+```
+import tbmate
+import pandas as pd
+idx_file="idx.gz"
+data=pd.read_csv("example/TCGA_BLCA_A13J_cpg.gz",sep='\t',header=None)
+data.columns=['seqname','start','end','TCGA_BLCA_A13J','depth']
+data.head()
+
+  seqname  start    end  TCGA_BLCA_A13J depth
+0    chr1  10468  10470         -1.0     .
+1    chr1  10470  10472         -1.0     .
+2    chr1  10483  10485         -1.0     .
+3    chr1  10488  10490         -1.0     .
+4    chr1  10492  10494         -1.0     .
+
+# Packing the 4th columns into .tbk files:
+tbmate.to_tbk(data=data,cols=['TCGA_BLCA_A13J'],idx=idx_file,dtypes='float',outdir="example")
+```
+The function to_tbk would first make sure the coordinate of idx file and dataframe are the same.</br>
+If the order or the coordinates of these two files are already the same, Then you could directly use pack_list function without check.
+```
+tbmate.pack_list(L=data['TCGA_BLCA_A13J'].tolist(),idx=idx_file,dtype='float',outfile="example/TCGA_BLCA_A13J.tbk")
+```
+ls -sh example/TCGA_BLCA_A13J*
+256M example/TCGA_BLCA_A13J_cpg.gz  127M example/TCGA_BLCA_A13J.tbk
+
+
+**2. Query .tbk files.**
+cd Test/EPIC
+Query probe cg27587195 from one .tbk file.
+```
+import tbmate
+tbk_file="GSM2995280_201868590258_R01C01.tbk"
+idx_file='idx.gz'
+tbmate.Query(tbk_file=tbk_file,seqname="cg27587195",idx=idx_file,dtype='float')
+```
+
+Query probe cg27587195 from multiple .tbk file.
+```
+import tbmate
+tbk_files=[file for file in os.listdir("./") if file.endswith('.tbk')]
+idx_file='idx.gz'
+tbmate.QueryMultiSamples(tbk_files=tbk_files,seqname='cg27587195',idx=idx_file,dtype='float')
 
 ```

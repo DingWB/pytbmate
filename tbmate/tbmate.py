@@ -158,6 +158,7 @@ def to_tbk(data=None,cols=[],idx='idx.gz',outdir="./",
     na: The NaN values in data will be replace with na, should be an integer.
     """
     outdir=os.path.abspath(outdir)
+    idx=os.path.abspath(idx)
 #    header=None
 #    with gzip.open(idx,'rb') as f:
 #        line=f.readline()
@@ -169,6 +170,7 @@ def to_tbk(data=None,cols=[],idx='idx.gz',outdir="./",
     df_idx['ID']=df_idx.seqname.map(str)+'-'+df_idx.start.map(str)+'-'+df_idx.end.map(str)
     data['ID']=data.iloc[:,0].map(str)+'-'+data.iloc[:,1].map(str)+'-'+data.iloc[:,2].map(str)
     data.set_index('ID',inplace=True)
+    df_idx.drop(['seqname','start','end'],axis=1,inplace=True)
     if type(dtypes)==str:
         dtypes=[dtypes]*len(cols)
     assert len(dtypes)==len(cols)
@@ -264,9 +266,11 @@ def Query(tbk_file=None,seqname=None,start=1,end=2,
     end: end position.
     base_idx: Number of index that should be skipped.
     """
-    if idx is None or dtype is None:
-        ver,dtype,num,idx=Header(tbk_file)
+    if dtype is None:
+        ver,dtype,num,idx1=Header(tbk_file)
         dtype=dtype_map_rev[dtype]
+    if idx is None:
+        idx=idx1
     fmt=dtype_fmt[dtype]
     tb = tabix.open(idx)
     records=tb.query(seqname,start,end)

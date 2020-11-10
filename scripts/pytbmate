@@ -7,7 +7,7 @@ Created on Tue Sep  8 17:34:38 2020
 """
 import os,sys
 import argparse
-from tbmate import Pack,Header,Query,View
+from tbmate import Pack,Header,View
 from tbmate.tbmate import __version__,dtype_fmt,dtype_map_rev
 # =============================================================================
 def prepare_optparser():
