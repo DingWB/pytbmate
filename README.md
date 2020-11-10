@@ -138,7 +138,7 @@ ls -sh example/TCGA_BLCA_A13J*
 256M example/TCGA_BLCA_A13J_cpg.gz  127M example/TCGA_BLCA_A13J.tbk
 
 
-**2. Query .tbk files.**
+**3. Query .tbk files.**
 cd Test/EPIC
 Query probe cg27587195 from one .tbk file.
 ```
@@ -148,11 +148,11 @@ idx_file='idx.gz'
 tbmate.Query(tbk_file=tbk_file,seqname="cg27587195",idx=idx_file,dtype='float')
 ```
 
-Query probe cg27587195 from multiple .tbk file.
+Query probe cg27587195 from multiple .tbk file. If you have many sampels to query, QueryMultiSamples maybe useful.
 ```
 import tbmate
 tbk_files=[file for file in os.listdir("./") if file.endswith('.tbk')]
 idx_file='idx.gz'
 tbmate.QueryMultiSamples(tbk_files=tbk_files,seqname='cg27587195',idx=idx_file,dtype='float')
-
 ```
+
