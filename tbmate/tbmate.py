@@ -282,7 +282,8 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
         start=size*int(Index)+base_idx
         f_tbk.seek(start)
         r=f_tbk.read(size)
-        sys.stdout.write("\t".join([Chr,Start,End,struct.unpack(fmt,r)[0]])+'\n')
+        v=struct.unpack(fmt,r)[0]
+        sys.stdout.write(f"{Chr}\t{Start}\t{End}\t{v}\n")
         line=fi.readline()
         line=line.decode('utf-8')
     fi.close()
