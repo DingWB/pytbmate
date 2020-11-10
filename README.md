@@ -47,4 +47,37 @@ python setup.py install
 ```
 
 ## **Usage**
-1. Building tabix index.
+**1. Building tabix index.**
+Download HM450 array manifest file and index it with tabix
+```
+wget ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/ProductFiles/HumanMethylation450/HumanMethylation450_15017482_v1-2.csv
+```
+Prepare tabix index file
+```
+sed '1,8d' HumanMethylation450_15017482_v1-2.csv |cut -f 1 -d ","|grep -E "^cg|^ch|^rs" | sort -k1V |awk 'BEGIN {OFS="\t";print "Chr","Start","End","Index"} {print $0,1,2,NR-1}' | bgzip > hm450_idx.bed.gz
+zcat hm450_idx.bed.gz |head
+```
+```
+Chr	Start	End	Index
+cg00000029	1	2	0
+cg00000108	1	2	1
+cg00000109	1	2	2
+cg00000165	1	2	3
+cg00000236	1	2	4
+cg00000289	1	2	5
+cg00000292	1	2	6
+cg00000321	1	2	7
+cg00000363	1	2	8
+```
+Index the bed.gz with tabix:
+```
+tabix -s 1 -b 2 -e 3 -p bed hm450_idx.bed.gz 
+```
+Simple query with tabix:
+```
+tabix hm450_idx.bed.gz cg18478105:1-2
+```
+
+Similarly, a EPIC manifest file can be downloaded from http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip. To save time, we provided the index files and tabix index for EPIC and WGBS in [test dataset](https://).
+
+**2. Packing data into .tbk files.**
