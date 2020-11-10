@@ -286,14 +286,15 @@ def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
         v=struct.unpack(fmt,r)[0]
         try:
             sys.stdout.write(f"{Chr}\t{Start}\t{End}\t{v}\n")
+            line=fi.readline()
+            line=line.decode('utf-8')
         except:
             try:
                 sys.stdout.close()
                 fi.close()
                 f_tbk.close()
+                break
             except: #IOError
                 pass
-        line=fi.readline()
-        line=line.decode('utf-8')
     fi.close()
     f_tbk.close()
