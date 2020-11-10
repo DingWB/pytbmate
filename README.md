@@ -52,11 +52,14 @@ python setup.py install
 ```
 #Downloading HM450 manifest file from illumina website
 wget ftp://webdata2:webdata2@ussd-ftp.illumina.com/downloads/ProductFiles/HumanMethylation450/HumanMethylation450_15017482_v1-2.csv
-
-#Prepare tabix index file
+```
+Prepare tabix index file
+```
 sed '1,8d' HumanMethylation450_15017482_v1-2.csv |cut -f 1 -d ","|grep -E "^cg|^ch|^rs" | sort -k1V |awk 'BEGIN {OFS="\t";print "Chr","Start","End","Index"} {print $0,1,2,NR-1}' | bgzip > hm450_idx.bed.gz
 zcat hm450_idx.bed.gz |head
+```
 
+```
 Chr	Start	End	Index
 cg00000029	1	2	0
 cg00000108	1	2	1
@@ -67,9 +70,13 @@ cg00000289	1	2	5
 cg00000292	1	2	6
 cg00000321	1	2	7
 cg00000363	1	2	8
+```
 
+```
 tabix -s 1 -b 2 -e 3 -p bed hm450_idx.bed.gz 
-#Simple query with tabix:
+```
+Simple query with tabix:
+```
 tabix hm450_idx.bed.gz cg18478105:1-2
 ```
 
