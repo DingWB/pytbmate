@@ -48,3 +48,29 @@ python setup.py install
 
 ## **Usage**
 1. Building tabix index.
+- (1). Downloading EPIC manifest file and building tabix index:
+```
+#Download manifest file of EPIC from https://support.illumina.com
+wget http://webdata.illumina.com.s3-website-us-east-1.amazonaws.com/downloads/productfiles/methylationEPIC/infinium-methylationepic-v5-manifest-file-csv.zip
+unzip infinium-methylationepic-v-1-0-b5-manifest-file-csv.zip
+#Prepare tabix index file
+sed '1,8d' infinium-methylationepic-v-1-0-b5-manifest-file.csv |cut -f 1 -d ","|sort -k1V |awk 'BEGIN {OFS="\t";print "Chr","Start","End","Index"} {print $0,1,2,NR-1}' | bgzip > epic_idx.gz
+zcat epic_idx.gz |head
+```
+```
+Chr	Start	End	Index
+10609447	1	2	0
+10627500	1	2	1
+10676356	1	2	2
+10714330	1	2	3
+10731326	1	2	4
+10732387	1	2	5
+10740401	1	2	6
+10744385	1	2	7
+10760363	1	2	8
+```
+```
+tabix -s 1 -b 2 -e 3 epic_idx.gz
+#Simple query with tabix:
+tabix epic_idx.gz cg18478105:1-2
+```
