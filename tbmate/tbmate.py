@@ -297,7 +297,12 @@ def QueryOneSiteInSamples(tbk_files=[],seqname=None,start=1,end=2,
     idx: index file.
     base_idx: Number of index that should be skipped.
     Example:
-        time r=QueryOneSiteInSamples(tbk_files,seqname,start,end,idx)
+        import os
+        import tbmate
+        seqname,start,end=['chr1',10483,10485]
+        tbk_files=['/mnt/isilon/zhou_lab/projects/20200106_human_WGBS/tbk_hg19/'+name for name in os.listdir('/mnt/isilon/zhou_lab/projects/20200928_EPIREJ/Wanding/rank')]
+        idx='/mnt/isilon/zhou_lab/projects/20191221_references/hg19/annotation/cpg/idx.gz'
+        time r=tbmate.QueryOneSiteInSamples(tbk_files,seqname,start,end,idx)
     """
     if idx is None:
         raise Exception("Please provide idx and dtype")
@@ -314,7 +319,8 @@ def QueryOneSiteInSamples(tbk_files=[],seqname=None,start=1,end=2,
             fmt=dtype_fmt[dtype]
             r.append(read_one_site(tbk_file,int(lineNum[0]),fmt,base_idx))
         colnames=['v1','v2']
-        data=pd.DataFrame(r,columns=colnames[:len(r[0])])
+        data=pd.DataFrame(r)
+        data.columns=colnames[:data.shape[1]]
         data.insert(0,'sample',basenames)
         return data
     else:
@@ -333,10 +339,11 @@ def QueryMultiSitesInSamples(tbk_files=[],coordinates=[],
     Example:
         import os
         import tbmate
+        idx='/mnt/isilon/zhou_lab/projects/20191221_references/hg19/annotation/cpg/idx.gz'
         tbk_files=['/mnt/isilon/zhou_lab/projects/20200106_human_WGBS/tbk_hg19/'+name for name in os.listdir('/mnt/isilon/zhou_lab/projects/20200928_EPIREJ/Wanding/rank')]
         coordinates=[['chr1',10483,10485],['chr2',11380,11382],['chr22',16085342,16085344]]
         idx='/mnt/isilon/zhou_lab/projects/20191221_references/hg19/annotation/cpg/idx.gz'
-        r=QueryMultiSitesInSamples(tbk_files,coordinates,idx)
+        data=tbmate.QueryMultiSitesInSamples(tbk_files,coordinates,idx)
     """
     if idx is None:
         raise Exception("Please provide idx")
@@ -357,7 +364,8 @@ def QueryMultiSitesInSamples(tbk_files=[],coordinates=[],
             basename=os.path.basename(tbk_file).replace('.tbk','')
             r=read_one_site(tbk_file,int(record[3]),fmt,base_idx)
             R.append(record[:3]+[basename]+r)
-    data=pd.DataFrame(R,columns=colnames[:len(R[0])])
+    data=pd.DataFrame(R)
+    data.columns=colnames[:data.shape[1]]
     return data
 # =============================================================================
 def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
