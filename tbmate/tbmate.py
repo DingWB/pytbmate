@@ -7,6 +7,7 @@ Created on Tue Sep  8 17:34:38 2020
 """
 import sys
 import os
+import numpy as np
 import struct
 import tabix
 import gzip
@@ -283,7 +284,8 @@ def Query(tbk_file=None,seqname=None,start=1,end=2,
         result=list(record[:3])
         result.extend(r)
         R.append(result)
-    data=pd.DataFrame(R,columns=colnames[:len(R[0])])
+    data=pd.DataFrame(R)
+    data.columns=colnames[:data.shape[1]]
     return data
 # =============================================================================
 def QueryOneSiteInSamples(tbk_files=[],seqname=None,start=1,end=2,
@@ -344,6 +346,7 @@ def QueryMultiSitesInSamples(tbk_files=[],coordinates=[],
         coordinates=[['chr1',10483,10485],['chr2',11380,11382],['chr22',16085342,16085344]]
         idx='/mnt/isilon/zhou_lab/projects/20191221_references/hg19/annotation/cpg/idx.gz'
         data=tbmate.QueryMultiSitesInSamples(tbk_files,coordinates,idx)
+        data=data.pivot_table(index=['seqname','start','end'],columns='sample',values='v1').reset_index()
     """
     if idx is None:
         raise Exception("Please provide idx")
@@ -366,7 +369,43 @@ def QueryMultiSitesInSamples(tbk_files=[],coordinates=[],
             R.append(record[:3]+[basename]+r)
     data=pd.DataFrame(R)
     data.columns=colnames[:data.shape[1]]
+    #data.pivot_table(index=['seqname','start','end'],columns='sample',values='v1').reset_index()
     return data
+# =============================================================================
+def read_idx_from_tbk(fi,tbk_file,line_num,fmt,total_size=8,\
+                       single_size=4,base_idx=8192):
+    """
+    single_size: size of a single f in fmt:
+    total_size: total size of bytes in fmt.
+    fmt: 'fi' of 'ff' for methylation and depth, 'f' for methylation without depth.
+    """
+    begain=total_size*line_num+base_idx
+    result=[]
+    fi.seek(begain)
+    for f in fmt:
+        r=fi.read(single_size)
+        result.append(struct.unpack(f,r)[0])
+    return result
+# =============================================================================
+def QueryByIndex(Index=None,tbk_files=None):
+    """
+    Index: a list of offset (index from idx file).
+    tbk_files: a list of .tbk files
+    """
+    data=pd.DataFrame(Index,columns='idx')
+    depth=data.copy()
+    for tbk_file in tbk_files:
+        print(tbk_file)
+        infile=os.path.abspath(tbk_file)
+        fi=open(infile,'rb')
+        sname=tbk_file.replace('.tbk','')
+        R=data.idx.apply(lambda x:read_idx_from_tbk(fi,infile,line_num=x,fmt='fi'))
+        data[sname]=R.apply(lambda x:x[0])
+        depth[sname]=R.apply(lambda x:x[1])
+        fi.close()
+    data.replace(-1,np.nan,inplace=True)
+    depth.replace(-1,np.nan,inplace=True)
+    return data,depth
 # =============================================================================
 def View(tbk_file=None,idx=None,dtype=None,base_idx=8192):
     """
